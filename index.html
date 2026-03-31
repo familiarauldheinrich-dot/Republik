@@ -12025,6 +12025,115 @@ function toggleTheme() {
 // INFINITE SCROLL — El Coliseo
 // ══════════════════════════════════════════
 
+// ══ SUPABASE — Base de datos real de Repúblik ══════════════════════
+const SUPABASE_URL = 'https://igfmhzmufttoknweqtqm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7yqeMUlDlH-il4LP5Njm5g_Ee9UIXbN';
+
+// Cliente Supabase liviano (sin librería externa)
+const db = {
+  async query(table, method = 'GET', body = null, filters = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : '',
+      },
+    };
+    if (body) opts.body = JSON.stringify(body);
+    try {
+      const resp = await fetch(url, opts);
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.message || resp.statusText);
+      }
+      return method === 'DELETE' ? true : await resp.json();
+    } catch (e) {
+      console.warn('Supabase error:', e.message);
+      return null;
+    }
+  },
+
+  // Registrar usuario nuevo
+  async registrarUsuario({ nombre, email, rut, region, tipo }) {
+    return this.query('usuarios', 'POST', { nombre, email, rut, region, tipo });
+  },
+
+  // Guardar voto ciudadano
+  async guardarVoto({ usuario_id, proyecto_id, voto }) {
+    return this.query('votos_ciudadanos', 'POST',
+      { usuario_id, proyecto_id, voto },
+    );
+  },
+
+  // Obtener votos de un proyecto
+  async obtenerVotosProyecto(proyecto_id) {
+    return this.query('v_votos_proyecto', 'GET', null,
+      `?proyecto_id=eq.${proyecto_id}`
+    );
+  },
+
+  // Guardar mensaje en La Plaza
+  async guardarMensaje({ usuario_id, canal, proyecto_id, contenido }) {
+    return this.query('mensajes', 'POST',
+      { usuario_id, canal, proyecto_id, contenido }
+    );
+  },
+
+  // Obtener mensajes de un canal
+  async obtenerMensajes(canal, limit = 50) {
+    return this.query('mensajes', 'GET', null,
+      `?canal=eq.${canal}&order=creado_en.asc&limit=${limit}`
+    );
+  },
+};
+
+// ── Integrar votos reales en los botones del feed ──────────────────
+function registrarVotoCiudadano(proyectoId, voto, btnEl) {
+  const usuario = JSON.parse(sessionStorage.getItem('republik_user') || '{}');
+
+  // Feedback visual inmediato
+  const parent = btnEl?.closest('.vote-actions, .coliseo-section');
+  if (parent) {
+    parent.querySelectorAll('.vbtn').forEach(b => {
+      b.style.opacity = '0.5';
+      b.style.pointerEvents = 'none';
+    });
+  }
+  if (btnEl) {
+    btnEl.style.opacity = '1';
+    btnEl.style.borderColor = 'var(--cyan)';
+    btnEl.textContent = btnEl.textContent.replace('✓','✓✓').replace('✕','✕').trim() + ' ✓';
+  }
+
+  // Guardar en Supabase si hay usuario autenticado
+  if (usuario?.id) {
+    db.guardarVoto({
+      usuario_id: usuario.id,
+      proyecto_id: proyectoId,
+      voto,
+    }).then(result => {
+      if (result) {
+        console.log(`Voto "${voto}" guardado en Repúblik para proyecto ${proyectoId}`);
+      }
+    });
+  }
+
+  // Actualizar contador ciudadano visualmente
+  const contadores = btnEl?.closest('.coliseo-section, .vote-block')
+    ?.querySelectorAll('.vc-favor, .vc-contra, .vc-abs');
+  if (contadores) {
+    contadores.forEach(c => {
+      const actual = parseInt(c.textContent) || 0;
+      if (voto === 'favor' && c.classList.contains('vc-favor'))   c.textContent = (actual + 1) + '%';
+      if (voto === 'contra' && c.classList.contains('vc-contra')) c.textContent = (actual + 1) + '%';
+      if (voto === 'abstencion' && c.classList.contains('vc-abs')) c.textContent = (actual + 1) + '%';
+    });
+  }
+}
+
 // ── API REAL DEL CONGRESO CHILE ────────────────────────────────────
 const API_CONGRESO = 'https://script.google.com/macros/s/AKfycbw7F5UpBK0uPYBkHCVSCMtNXtmDB81A4VJ8vozPVrfyMJI1C9HqfBMkZJf_diDXqenu/exec';
 
