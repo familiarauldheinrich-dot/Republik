@@ -10338,20 +10338,44 @@ function submitRegistro() {
   btn.classList.add('loading');
   setTimeout(() => {
     btn.textContent = 'Creando cuenta…';
-    setTimeout(() => {
+    setTimeout(async () => {
+
+      // ── Guardar usuario en Supabase ──────────────────────────────
+      let usuarioId = null;
+      try {
+        const resultado = await db.registrarUsuario({
+          nombre,
+          email,
+          rut: rut.replace(/\./g,'').replace(/-/g,''), // guardar sin formato
+          region,
+          tipo: tipoCuenta,
+        });
+        if (resultado && resultado[0]) {
+          usuarioId = resultado[0].id;
+          console.log('Usuario registrado en Supabase:', usuarioId);
+        }
+      } catch (e) {
+        console.warn('No se pudo guardar en Supabase (se continúa igual):', e.message);
+      }
+
+      // Guardar en sessionStorage (con id de Supabase si se obtuvo)
       sessionStorage.setItem('republik_user', JSON.stringify({
-        nombre, email, region, tipo: tipoCuenta,
-        rut_verificado: true, serie_verificada: true
+        id: usuarioId,
+        nombre, email, region,
+        tipo: tipoCuenta,
+        rut_verificado: true,
+        serie_verificada: true,
       }));
+
       document.getElementById('formRegistro').style.display = 'none';
       document.getElementById('formTitle').style.display    = 'none';
       document.querySelector('.form-tabs').style.display    = 'none';
       document.querySelector('.form-header').style.display  = 'none';
       const tipoLabels = {
-        espectador: 'como espectador',
-        votante: 'como votante activo',
+        espectador:   'como espectador',
+        votante:      'como votante activo',
         participante: 'como participante en La Plaza',
-        ciudadano: 'como ciudadano con acceso completo'
+        ciudadano:    'como ciudadano con acceso completo'
       };
       document.getElementById('successMsg').innerHTML = `
         Identidad verificada. Cuenta creada
