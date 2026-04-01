@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-
-<!-- CSS de la pantalla de acceso -->
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1083,8 +1081,6 @@
     line-height: 1.5;
   }
   .rut-info strong { color: var(--mist); }</style>
-
-<!-- CSS del prototipo Repúblik -->
 <style>
   :root {
     --black: #0c1220;
@@ -6723,31 +6719,14 @@
 </head>
 <body>
 </style>
-
-<!-- Estilos de integración -->
 <style>
-  #login-screen {
-    position: relative;
-    z-index: 1000;
-  }
-  #app-screen {
-    display: none;
-  }
-  .admin-badge {
-    font-size: 0.48rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    background: rgba(192,57,43,0.15);
-    border: 1px solid #d94f2b;
-    color: #f47060;
-    font-family: 'DM Mono', monospace;
-  }
+  #login-screen { position: relative; z-index: 1000; }
+  #app-screen   { display: none; }
+  .admin-badge  { font-size:0.48rem; letter-spacing:0.1em; text-transform:uppercase; padding:2px 8px; background:rgba(192,57,43,0.15); border:1px solid #d94f2b; color:#f47060; font-family:"DM Mono",monospace; }
 </style>
 </head>
 <body>
 
-<!-- ══ PANTALLA DE ACCESO ══ -->
 <div id="login-screen">
 <!-- FONDO -->
 <div class="bg">
@@ -6828,9 +6807,9 @@
     <!-- Barra superior con toggle de tema -->
     <div class="form-topbar">
       <div class="form-topbar-brand">REPÚBLIK<span style="color:var(--gold);">.</span></div>
-      <button class="form-topbar-theme" id="acc-themeToggle" onclick="toggleTema()">
-        <span class="theme-toggle-icon" id="acc-themeIcon">☀</span>
-        <span id="acc-themeLabel">Claro</span>
+      <button class="form-topbar-theme" id="themeToggle" onclick="toggleTema()">
+        <span class="theme-toggle-icon" id="themeIcon">☀</span>
+        <span id="themeLabel">Claro</span>
       </button>
     </div>
 
@@ -7223,7 +7202,6 @@
 </div>
 </div>
 
-<!-- ══ PROTOTIPO REPÚBLIK (oculto hasta autenticación) ══ -->
 <div id="app-screen">
 <!-- TICKER -->
 <div class="ticker-wrap">
@@ -7254,7 +7232,7 @@
       <span class="theme-toggle-icon" id="themeIcon">☀</span>
       <span id="themeLabel">Claro</span>
     </button>
-    <button class="user-btn" onclick="showView('perfil', null)" id="mainUserBtn">Mi Perfil</button>
+    <button class="user-btn" onclick="showView('perfil', null)">Mi perfil</button>
   </div>
 </header>
 
@@ -9849,7 +9827,7 @@
 </div>
 </div>
 
-<!-- JS de la pantalla de acceso -->
+<!-- JS acceso -->
 <script>
 // ── Modal Login rápido ───────────────────────
 function abrirModalLogin() {
@@ -9969,8 +9947,8 @@ function olvidePwd() {
 let temaActual = 'nocturno';
 function toggleTema() {
   const body  = document.body;
-  const icon  = document.getElementById('acc-themeIcon');
-  const label = document.getElementById('acc-themeLabel');
+  const icon  = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
   body.style.transition = 'background 0.35s, color 0.35s';
   if (temaActual === 'nocturno') {
     temaActual = 'claro';
@@ -9992,8 +9970,8 @@ function toggleTema() {
     if (saved === 'claro') {
       temaActual = 'claro';
       document.body.setAttribute('data-theme', 'claro');
-      document.getElementById('acc-themeIcon').textContent  = '☽';
-      document.getElementById('acc-themeLabel').textContent = 'Nocturno';
+      document.getElementById('themeIcon').textContent  = '☽';
+      document.getElementById('themeLabel').textContent = 'Nocturno';
     }
   } catch(e) {}
 })();
@@ -10338,44 +10316,20 @@ function submitRegistro() {
   btn.classList.add('loading');
   setTimeout(() => {
     btn.textContent = 'Creando cuenta…';
-    setTimeout(async () => {
-
-      // ── Guardar usuario en Supabase ──────────────────────────────
-      let usuarioId = null;
-      try {
-        const resultado = await db.registrarUsuario({
-          nombre,
-          email,
-          rut: rut.replace(/\./g,'').replace(/-/g,''), // guardar sin formato
-          region,
-          tipo: tipoCuenta,
-        });
-        if (resultado && resultado[0]) {
-          usuarioId = resultado[0].id;
-          console.log('Usuario registrado en Supabase:', usuarioId);
-        }
-      } catch (e) {
-        console.warn('No se pudo guardar en Supabase (se continúa igual):', e.message);
-      }
-
-      // Guardar en sessionStorage (con id de Supabase si se obtuvo)
+    setTimeout(() => {
       sessionStorage.setItem('republik_user', JSON.stringify({
-        id: usuarioId,
-        nombre, email, region,
-        tipo: tipoCuenta,
-        rut_verificado: true,
-        serie_verificada: true,
+        nombre, email, region, tipo: tipoCuenta,
+        rut_verificado: true, serie_verificada: true
       }));
-
       document.getElementById('formRegistro').style.display = 'none';
       document.getElementById('formTitle').style.display    = 'none';
       document.querySelector('.form-tabs').style.display    = 'none';
       document.querySelector('.form-header').style.display  = 'none';
       const tipoLabels = {
-        espectador:   'como espectador',
-        votante:      'como votante activo',
+        espectador: 'como espectador',
+        votante: 'como votante activo',
         participante: 'como participante en La Plaza',
-        ciudadano:    'como ciudadano con acceso completo'
+        ciudadano: 'como ciudadano con acceso completo'
       };
       document.getElementById('successMsg').innerHTML = `
         Identidad verificada. Cuenta creada
@@ -10437,7 +10391,7 @@ const _CUENTAS = [
     // admin / republik2024*
     _u: _h('admin'),
     _p: _h('republik2024*'),
-    perfil: { nombre: 'Admin', email: 'admin@republik.cl', tipo: 'admin', rol_display: '⚙ Admin' }
+    perfil: { nombre: 'Administrador', email: 'admin@republik.cl', tipo: 'admin', rol_display: '⚙ Admin' }
   },
   {
     // nicole / psico2024
@@ -10457,66 +10411,13 @@ function verificarCredenciales(usuario, pwd) {
 
 // ── Navegar al coliseo ────────────────────────
 function irAlColiseo() {
-  const usuario = JSON.parse(sessionStorage.getItem('republik_user') || '{}');
-  const login = document.getElementById('login-screen');
-  const app   = document.getElementById('app-screen');
-
-  // Fade out login
-  login.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-  login.style.opacity = '0';
-  login.style.transform = 'scale(1.02)';
-
+  // Animación de salida
+  document.querySelector('.page').style.cssText = 'opacity:0;transform:scale(1.02);transition:all 0.5s ease;';
   setTimeout(() => {
-    login.style.display = 'none';
-    app.style.display = 'block';
-
-    // Personalizar con datos del usuario
-    const nombre = usuario.nombre || 'Ciudadano/a';
-    const tipo   = usuario.tipo   || 'ciudadano';
-
-    // Botón de perfil siempre dice 'Mi Perfil'
-    const userBtn = document.getElementById('mainUserBtn') || app.querySelector('.user-btn');
-    if (userBtn) userBtn.textContent = 'Mi Perfil';
-
-    // Nombre en la sidebar izquierda
-    const profileName = app.querySelector('.profile-name');
-    if (profileName) profileName.textContent = nombre;
-
-    // Badge admin
-    if (tipo === 'admin') {
-      const header = app.querySelector('header');
-      if (header && !header.querySelector('.admin-badge')) {
-        const badge = document.createElement('span');
-        badge.className = 'admin-badge';
-        badge.textContent = '⚙ Admin';
-        const lb = header.querySelector('.live-badge');
-        if (lb) lb.before(badge);
-      }
-    }
-
-    // Sincronizar tema si el usuario lo cambió en el login
-    const savedTema = localStorage.getItem('republik-tema-acceso');
-    if (savedTema === 'claro') {
-      app.querySelector('body, [data-theme]');
-      document.body.setAttribute('data-theme', 'claro');
-      const ti = app.querySelector('#themeIcon');
-      const tl = app.querySelector('#themeLabel');
-      if (ti) ti.textContent = '☽';
-      if (tl) tl.textContent = 'Nocturno';
-    }
-
-    // Inicializar funciones que esperaban DOMContentLoaded
-    if (typeof _initTendencia === 'function') _initTendencia();
-    if (typeof _initScroll   === 'function') _initScroll();
-
-    // Fade in app
-    app.style.opacity = '0';
-    requestAnimationFrame(() => {
-      app.style.transition = 'opacity 0.4s ease';
-      app.style.opacity = '1';
-    });
-
-  }, 480);
+    // En producción: window.location.href = 'republik_variacion.html'
+    // Para el prototipo: abrimos en la misma ventana
+    window.location.href = 'republik_variacion.html';
+  }, 500);
 }
 
 // ── Contadores animados ───────────────────────
@@ -10543,7 +10444,124 @@ function animarContadores() {
 animarContadores();
 </script>
 
-<!-- JS del prototipo Repúblik -->
+<!-- JS integracion -->
+<script>
+
+// ══ INTEGRACIÓN — Supabase + Login→App ══════════════════════════
+
+var SUPABASE_URL = 'https://igfmhzmufttoknweqtqm.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnZm1oem11ZnR0b2tud2VxdHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODI4NjEsImV4cCI6MjA5MDU1ODg2MX0.R302IdO1Uy3EgXohmBUc-GBw0bJOZt0EorT-DvnEaNs';
+
+var db = {
+  post: function(tabla, datos) {
+    return fetch(SUPABASE_URL + '/rest/v1/' + tabla, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(datos)
+    })
+    .then(function(r) { return r.json(); })
+    .catch(function(e) { console.warn('Supabase error:', e.message); return null; });
+  }
+};
+
+function guardarUsuarioSupabase(nombre, email, rut, region, tipo) {
+  db.post('usuarios', {
+    nombre: nombre,
+    email:  email,
+    rut:    rut.replace(/\./g,'').replace(/-/g,''),
+    region: region,
+    tipo:   tipo
+  }).then(function(res) {
+    if (res && res[0] && res[0].id) {
+      var u = JSON.parse(sessionStorage.getItem('republik_user') || '{}');
+      u.id = res[0].id;
+      sessionStorage.setItem('republik_user', JSON.stringify(u));
+      console.log('Supabase: usuario guardado', res[0].id);
+    }
+  });
+}
+
+// Sobrescribir irAlColiseo del script de acceso
+function irAlColiseo() {
+  var usuario = JSON.parse(sessionStorage.getItem('republik_user') || '{}');
+  var login = document.getElementById('login-screen');
+  var app   = document.getElementById('app-screen');
+
+  // Guardar en Supabase si es registro nuevo
+  if (usuario.rut_verificado && usuario.nombre && !usuario.id) {
+    guardarUsuarioSupabase(
+      usuario.nombre,
+      usuario.email || '',
+      usuario.rut   || '00000000-0',
+      usuario.region || '',
+      usuario.tipo   || 'espectador'
+    );
+  }
+
+  // Transición visual
+  login.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  login.style.opacity    = '0';
+  login.style.transform  = 'scale(1.02)';
+
+  setTimeout(function() {
+    login.style.display = 'none';
+    app.style.display   = 'block';
+
+    // Personalizar UI con datos del usuario
+    var nombre = usuario.nombre || 'Ciudadano/a';
+    var tipo   = usuario.tipo   || 'ciudadano';
+
+    var userBtn = document.getElementById('mainUserBtn') || app.querySelector('.user-btn');
+    if (userBtn) userBtn.textContent = 'Mi Perfil';
+
+    var profileName = app.querySelector('.profile-name');
+    if (profileName) profileName.textContent = nombre;
+
+    // Badge admin
+    if (tipo === 'admin') {
+      var header = app.querySelector('header');
+      if (header && !header.querySelector('.admin-badge')) {
+        var badge = document.createElement('span');
+        badge.className   = 'admin-badge';
+        badge.textContent = '\u2699 Admin';
+        var lb = header.querySelector('.live-badge');
+        if (lb) lb.before(badge);
+      }
+    }
+
+    // Sincronizar tema
+    var savedTema = localStorage.getItem('republik-tema-acceso');
+    if (savedTema === 'claro') {
+      document.body.setAttribute('data-theme', 'claro');
+      var ti = document.getElementById('themeIcon');
+      var tl = document.getElementById('themeLabel');
+      if (ti) ti.textContent = '\u263d';
+      if (tl) tl.textContent = 'Nocturno';
+    }
+
+    // Disparar DOMContentLoaded para inicializar el prototipo
+    // (los listeners del prototipo esperan este evento)
+    var evt = new Event('DOMContentLoaded', { bubbles: true, cancelable: false });
+    document.dispatchEvent(evt);
+
+    // Fade in
+    app.style.opacity = '0';
+    requestAnimationFrame(function() {
+      app.style.transition = 'opacity 0.4s ease';
+      app.style.opacity    = '1';
+    });
+
+  }, 480);
+}
+
+</script>
+
+<!-- JS prototipo -->
 <script>
 const lawData = {
   salud: {
@@ -10836,7 +10854,7 @@ function actualizarRegionDesdeComuna(select) {
   }
 }
 
-function _initTendencia() {
+document.addEventListener('DOMContentLoaded', () => {
   const tendenciaSelect = document.getElementById('pvTendencia');
   if (tendenciaSelect) {
     tendenciaSelect.addEventListener('change', function() {
@@ -11163,7 +11181,7 @@ function insertarVotacionRef() {
 }
 
 function verPerfilDesdeChat() {
-  showView('perfil', null);
+  showView('perfil', document.querySelector('nav a:last-child'));
 }
 
 function unirseGrupo() {
@@ -11406,7 +11424,7 @@ function irAPlazaCompleta() {
   cerrarChatPanel();
   closeModal();
   const plazaId = chatProyectos[chatPanelProyectoActual]?.plazaId;
-  showView('plaza', null);
+  showView('plaza', document.querySelector('nav a:last-child'));
   setTimeout(() => {
     // Cambiar al tab abiertos y abrir la conversación correspondiente
     const tabAbiertos = document.querySelectorAll('.plaza-tab')[2];
@@ -11624,9 +11642,9 @@ function guardarPerfil() {
     }, 2000);
   });
 
-  // El botón del header siempre dice "Mi Perfil"
-  const userBtn = document.querySelector('#mainUserBtn, .user-btn');
-  if (userBtn) userBtn.textContent = 'Mi Perfil';
+  // Actualizar también el botón del header
+  const userBtn = document.querySelector('.user-btn');
+  if (userBtn) userBtn.textContent = nombre.split(' ')[0] || 'Mi perfil';
 
   console.log('Perfil guardado:', { nombre, region, temas: temasSeleccionados, nivel: nivelNum });
 }
@@ -11799,16 +11817,15 @@ function actualizarContextoFeed(tipo, cantidad) {
 }
 
 function showView(id, el) {
-  const app = document.getElementById('app-screen') || document;
-  app.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const target = document.getElementById('view-' + id);
-  if (target) target.classList.add('active');
-  app.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   if (el) el.classList.add('active');
   if (id === 'arena') setTimeout(initArenaAnimations, 50);
   if (id === 'plaza') {
+    // Abrir la primera conversación automáticamente
     setTimeout(() => {
-      const first = app.querySelector('.plaza-conv-item[data-tipo="directo"]');
+      const first = document.querySelector('.plaza-conv-item[data-tipo="directo"]');
       if (first && !convActiva) abrirConv(first.dataset.conv, first);
     }, 80);
   }
@@ -12048,173 +12065,6 @@ function toggleTheme() {
 // ══════════════════════════════════════════
 // INFINITE SCROLL — El Coliseo
 // ══════════════════════════════════════════
-
-// ══ SUPABASE — Base de datos real de Repúblik ══════════════════════
-const SUPABASE_URL = 'https://igfmhzmufttoknweqtqm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnZm1oem11ZnR0b2tud2VxdHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODI4NjEsImV4cCI6MjA5MDU1ODg2MX0.R302IdO1Uy3EgXohmBUc-GBw0bJOZt0EorT-DvnEaNs';
-
-// Cliente Supabase liviano (sin librería externa)
-const db = {
-  async query(table, method = 'GET', body = null, filters = '') {
-    const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
-    const opts = {
-      method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : '',
-      },
-    };
-    if (body) opts.body = JSON.stringify(body);
-    try {
-      const resp = await fetch(url, opts);
-      if (!resp.ok) {
-        const err = await resp.json();
-        throw new Error(err.message || resp.statusText);
-      }
-      return method === 'DELETE' ? true : await resp.json();
-    } catch (e) {
-      console.warn('Supabase error:', e.message);
-      return null;
-    }
-  },
-
-  // Registrar usuario nuevo
-  async registrarUsuario({ nombre, email, rut, region, tipo }) {
-    return this.query('usuarios', 'POST', { nombre, email, rut, region, tipo });
-  },
-
-  // Guardar voto ciudadano
-  async guardarVoto({ usuario_id, proyecto_id, voto }) {
-    return this.query('votos_ciudadanos', 'POST',
-      { usuario_id, proyecto_id, voto },
-    );
-  },
-
-  // Obtener votos de un proyecto
-  async obtenerVotosProyecto(proyecto_id) {
-    return this.query('v_votos_proyecto', 'GET', null,
-      `?proyecto_id=eq.${proyecto_id}`
-    );
-  },
-
-  // Guardar mensaje en La Plaza
-  async guardarMensaje({ usuario_id, canal, proyecto_id, contenido }) {
-    return this.query('mensajes', 'POST',
-      { usuario_id, canal, proyecto_id, contenido }
-    );
-  },
-
-  // Obtener mensajes de un canal
-  async obtenerMensajes(canal, limit = 50) {
-    return this.query('mensajes', 'GET', null,
-      `?canal=eq.${canal}&order=creado_en.asc&limit=${limit}`
-    );
-  },
-};
-
-// ── Integrar votos reales en los botones del feed ──────────────────
-function registrarVotoCiudadano(proyectoId, voto, btnEl) {
-  const usuario = JSON.parse(sessionStorage.getItem('republik_user') || '{}');
-
-  // Feedback visual inmediato
-  const parent = btnEl?.closest('.vote-actions, .coliseo-section');
-  if (parent) {
-    parent.querySelectorAll('.vbtn').forEach(b => {
-      b.style.opacity = '0.5';
-      b.style.pointerEvents = 'none';
-    });
-  }
-  if (btnEl) {
-    btnEl.style.opacity = '1';
-    btnEl.style.borderColor = 'var(--cyan)';
-    btnEl.textContent = btnEl.textContent.replace('✓','✓✓').replace('✕','✕').trim() + ' ✓';
-  }
-
-  // Guardar en Supabase si hay usuario autenticado
-  if (usuario?.id) {
-    db.guardarVoto({
-      usuario_id: usuario.id,
-      proyecto_id: proyectoId,
-      voto,
-    }).then(result => {
-      if (result) {
-        console.log(`Voto "${voto}" guardado en Repúblik para proyecto ${proyectoId}`);
-      }
-    });
-  }
-
-  // Actualizar contador ciudadano visualmente
-  const contadores = btnEl?.closest('.coliseo-section, .vote-block')
-    ?.querySelectorAll('.vc-favor, .vc-contra, .vc-abs');
-  if (contadores) {
-    contadores.forEach(c => {
-      const actual = parseInt(c.textContent) || 0;
-      if (voto === 'favor' && c.classList.contains('vc-favor'))   c.textContent = (actual + 1) + '%';
-      if (voto === 'contra' && c.classList.contains('vc-contra')) c.textContent = (actual + 1) + '%';
-      if (voto === 'abstencion' && c.classList.contains('vc-abs')) c.textContent = (actual + 1) + '%';
-    });
-  }
-}
-
-// ── API REAL DEL CONGRESO CHILE ────────────────────────────────────
-const API_CONGRESO = 'https://script.google.com/macros/s/AKfycbw7F5UpBK0uPYBkHCVSCMtNXtmDB81A4VJ8vozPVrfyMJI1C9HqfBMkZJf_diDXqenu/exec';
-
-// Cargar proyectos reales del Congreso al iniciar El Coliseo
-async function cargarDatosRealesCongreso() {
-  const ticker = document.querySelector('.feed-section-sep');
-  if (ticker) ticker.textContent = '⏳ Conectando con el Congreso...';
-
-  try {
-    const resp = await fetch(`${API_CONGRESO}?tipo=proyectos`);
-    if (!resp.ok) throw new Error('Sin respuesta');
-    const data = await resp.json();
-
-    if (data.fuente === 'congreso_chile' && data.proyectos?.length > 0) {
-      // Convertir proyectos reales al formato de Repúblik
-      const proyectosReales = data.proyectos.map(p => ({
-        urgencia: null,
-        camara: p.camara || 'Congreso Nacional',
-        fecha: p.fecha ? new Date(p.fecha).toLocaleDateString('es-CL') : 'Reciente',
-        stage: 'tramitacion',
-        stageLabel: p.etapa || 'En tramitación',
-        tipo: 'votacion',
-        temasData: 'legislacion',
-        chatId: 'salud',
-        plazaId: 'plaza-general',
-        chatCount: Math.floor(Math.random() * 500 + 50).toString(),
-        titulo: p.titulo || 'Proyecto sin título',
-        resumen: p.resumen || 'Proyecto en tramitación en el Congreso Nacional de Chile.',
-        temas: ['🏛️ Legislación'],
-        favorCong: Math.floor(Math.random() * 40 + 40),
-        contraCong: Math.floor(Math.random() * 30 + 10),
-        absCong: Math.floor(Math.random() * 15 + 5),
-        favorCiud: 0, contraCiud: 0, absCiud: 0,
-        totalCiud: '0',
-        fractura: false,
-        esReal: true,
-        boletin: p.id || '',
-      }));
-
-      // Agregar proyectos reales AL INICIO del banco
-      proyectosBank.unshift(...proyectosReales);
-
-      if (ticker) ticker.textContent = `✅ ${proyectosReales.length} proyectos reales del Congreso cargados`;
-      setTimeout(() => {
-        if (ticker) ticker.textContent = 'Más proyectos';
-      }, 3000);
-
-      console.log(`Repúblik: ${proyectosReales.length} proyectos reales cargados del Congreso`);
-    } else {
-      if (ticker) ticker.textContent = 'Más proyectos';
-      console.log('Repúblik: usando datos de ejemplo (API sin datos en este momento)');
-    }
-  } catch (err) {
-    if (ticker) ticker.textContent = 'Más proyectos';
-    console.warn('Repúblik: API del Congreso no disponible, usando datos de ejemplo:', err.message);
-  }
-}
 
 // Banco de proyectos de ley adicionales para simular el feed
 const proyectosBank = [
@@ -12485,12 +12335,9 @@ function initInfiniteScroll() {
 }
 
 // Inicializar cuando el DOM está listo
-function _initScroll() {
+document.addEventListener('DOMContentLoaded', () => {
   initScrollAnimations();
   initInfiniteScroll();
-
-  // Cargar datos reales del Congreso
-  cargarDatosRealesCongreso();
 
   // Primera carga automática (feed empieza con pocas cards, cargar más inmediatamente)
   setTimeout(() => cargarMasProyectos(), 800);
